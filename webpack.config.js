@@ -24,6 +24,11 @@ const baseConfig = {
   module: {
     rules: [
       {
+        // ESM packages (react-virtuoso) import "react/jsx-runtime" without a file extension
+        test: /\.m?js$/,
+        resolve: { fullySpecified: false },
+      },
+      {
         test: /\.tsx?$/,
         loader: "ts-loader",
         exclude: /node_modules/,
