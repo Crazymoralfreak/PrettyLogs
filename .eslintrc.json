@@ -1,0 +1,24 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": { "jsx": true }
+  },
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "env": { "browser": true, "node": true, "es2020": true },
+  "ignorePatterns": ["dist", "node_modules", "webpack.config.js"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/consistent-type-imports": "warn",
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "TSImportType",
+        "message": "Inline import() types are not allowed, import at the top of the module."
+      }
+    ]
+  }
+}

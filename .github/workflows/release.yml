@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Check that the tag matches package.json
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "v$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version v$VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      # node-pty (a transitive dependency of the Lens typings) is not needed for the build
+      - run: npm ci --ignore-scripts
+
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Pack the extension
+        run: |
+          npm pack --ignore-scripts
+          PACKED=$(ls ./*.tgz | head -n 1)
+          mkdir -p release
+          cp "$PACKED" "release/openlens-prettylogs-${VERSION}.tgz"
+          # stable file name, so the install link ".../releases/latest/download/prettylogs.tgz" never changes
+          cp "$PACKED" release/prettylogs.tgz
+
+      - name: Publish the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            release/openlens-prettylogs-${{ env.VERSION }}.tgz
+            release/prettylogs.tgz
